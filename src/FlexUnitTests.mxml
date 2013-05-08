@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					   xmlns:s="library://ns.adobe.com/flex/spark" 
+					   xmlns:mx="library://ns.adobe.com/flex/mx" 
+					   xmlns:adobe="http://www.adobe.com/2009/flexUnitUIRunner"
+					   creationComplete="startTesting(event)">
+	<fx:Declarations>
+		<!-- Platzieren Sie nichtvisuelle Elemente (z. B. Dienste, Wertobjekte) hier -->
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import UnitTesting.suites.RoundtripTestSuite;
+			
+			import org.flexunit.runner.FlexUnitCore;
+			private function startTesting(e:Event):void{
+				var core:FlexUnitCore = new FlexUnitCore();
+				core.addListener(myBase);
+				core.run(RoundtripTestSuite);
+			}
+		]]>
+	</fx:Script>
+	<adobe:TestRunnerBase id="myBase" />
+</s:WindowedApplication>

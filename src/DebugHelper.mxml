@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					   xmlns:s="library://ns.adobe.com/flex/spark" 
+					   xmlns:mx="library://ns.adobe.com/flex/mx"
+					   applicationComplete="init(event)">
+	<!-- This App's purpose is to help debugging the Converter-Classes without the need to load the UI 
+	of the standard application or to setup a conversion of a test xml manualy -->
+	<fx:Declarations>
+	</fx:Declarations>
+	<s:TextArea id="resultTextArea" 
+				width="100%" height="100%"
+				lineBreak="explicit"/>
+	<fx:Script>
+		<![CDATA[
+			import UnitTesting.TestData;
+			
+			import de.franziskaneumeister.fcpxmlconverter.XMLDownConverter;
+			private function init(e:Event):void{
+				var converter:XMLDownConverter = new XMLDownConverter();
+				converter.setFCPXML(TestData.threeClipsFromX);
+				converter.isProject = true;
+				converter.startConverstion();
+				this.resultTextArea.text = converter.getXMLAsString();
+				var result:XML = converter.getXMLResult();
+				result;
+			}
+		]]>
+	</fx:Script>
+</s:WindowedApplication>

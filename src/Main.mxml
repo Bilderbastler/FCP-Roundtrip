@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					   xmlns:s="library://ns.adobe.com/flex/spark" 
+					   xmlns:mx="library://ns.adobe.com/flex/mx"
+					   applicationComplete="init(event)" 
+					   width="1024" height="768"
+					   backgroundColor="0x333333">
+	<fx:Declarations>
+		<!-- Platzieren Sie nichtvisuelle Elemente (z. B. Dienste, Wertobjekte) hier -->
+		<s:RadioButtonGroup id="projectOrSequence" />
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import de.franziskaneumeister.fcpxmlconverter.XMLDownConverter;
+			
+			import mx.controls.Alert;
+			private var xmlXFile:File;
+			private var downConverter:XMLDownConverter;
+			
+			/**
+			 * sets up the application
+			 */
+			private function init(e:Event):void{
+				this.xmlXFile = new File();
+				this.downConverter = new XMLDownConverter();
+			}
+			/**
+			 * opens the file select dialog window to select a FCP X xml file
+			 */
+			private function onOpenFileDialog(e:Event):void{
+				try{
+					var xmlFileFilter:FileFilter = new FileFilter("FCP X XML", "*.fcpxml");
+					this.xmlXFile.browseForOpen("Choose FCP X XML file", [xmlFileFilter]);
+					this.xmlXFile.addEventListener(Event.SELECT, onFileSelected);
+				}catch (err:Error){
+					trace(err);
+				}
+			}
+			
+			/**
+			 *  Opens the XML File and extracts the Data to a XML Object.
+			 */
+			private function onFileSelected(e:Event):void{
+				var f:File = e.target as File;
+				this.xmlSrcPathLabel.text = f.nativePath;
+				
+				var fs:FileStream = new FileStream();
+				fs.open(f, FileMode.READ);
+				var xmlX:XML = XML(fs.readUTFBytes(fs.bytesAvailable));
+				fs.close();
+				this.downConverter.setFCPXML(xmlX);
+				
+				this.fcpXtextfield.text = xmlX.toXMLString();
+				this.saveXMLButton.enabled = false;
+				this.fcp7textfield.text = "";
+			}
+			
+			/**
+			 * starts the conversion process of the loaded xml data
+			 */
+			private function generateXmeml():void{
+				this.downConverter.startConverstion();
+				var resultString:String = this.downConverter.getXMLAsString();
+				if(resultString == null){
+					Alert.show("The XML could not be converted. Sorry", "Problem", Alert.OK);
+				}else{
+					this.saveXMLButton.enabled = true;
+					this.fcp7textfield.text = resultString;
+				}
+			}
+			
+			/**
+			 * Writes the newly created FCP 7 xml to the selected file
+			 */ 
+			private function onOutputFileSelected(e:Event):void{
+				var f:File = e.target as File;
+				var fs:FileStream = new FileStream();
+				fs.open(f, FileMode.WRITE);
+				var output:String = this.downConverter.getXMLAsString();
+				fs.writeUTFBytes(output);
+				fs.close();
+			}
+		]]>
+	</fx:Script>
+	<mx:HBox left="10" top="10">
+		<s:Button label="Open FCP 7 XML File" click="onOpenFileDialog(event)" />
+		<s:Label verticalAlign="middle" height="22" id="xmlSrcPathLabel"/>
+	</mx:HBox>
+	<s:HGroup left="10" right="10" top="40" bottom="40">
+		<s:VGroup width="50%" height="100%">
+			<s:Label text="Final Cut X XML"/>
+			<s:TextArea id="fcpXtextfield"
+						width="100%" height="100%"
+						lineBreak="explicit"/>
+		</s:VGroup>
+		<s:VGroup width="50%" height="100%">
+			<s:Label text="Final Cut Pro 7 XML" verticalAlign="bottom"/>
+			<s:TextArea id="fcp7textfield" 
+						width="100%" height="100%"
+						lineBreak="explicit"/>
+		</s:VGroup>
+	</s:HGroup>
+	
+		<mx:HBox left="10" bottom="10">
+			<s:RadioButton id="isProject" label="Generate Project" group="{projectOrSequence}" selected="true"/>
+			<s:RadioButton id="isSequence" label="Generate Sequence" group="{projectOrSequence}" />
+		</mx:HBox>
+	
+	<mx:HBox right="10" bottom="10">
+		<s:Button label="Generate FCP 7 XML" click="generateXmeml()"/>
+		<s:Button id="saveXMLButton" label="Save XML" click="onOutputFileSelected(event)" enabled="false"/>
+	</mx:HBox>
+</s:WindowedApplication>
